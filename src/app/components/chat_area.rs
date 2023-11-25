@@ -1,5 +1,5 @@
 use leptos::{*, html::Div};
-use crate::model::conversation::{Conversation, self};
+use crate::model::conversation::{Conversation};
 
 const USER_MESSAGE_CLASS: &str = "max-w-md p-4 mb-5 rounded-lg self-end";
 const MODEL_MESSAGE_CLASS: &str = "max-w-md p-4 mb-5 rounded-lg self-start";

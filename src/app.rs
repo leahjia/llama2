@@ -3,13 +3,12 @@ use futures::stream::SplitSink;
 
 use leptos::*;
 use leptos_meta::*;
-use leptos_router::*;
 
 mod components;
 use components::chat_area::ChatArea;
 use components::type_area::TypeArea;
 
-use crate::{model::conversation::{self, Conversation, Message}};
+use crate::{model::conversation::{Conversation, Message}};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -18,7 +17,7 @@ pub fn App() -> impl IntoView {
 
     use gloo_net::websocket::futures::WebSocket;
     use gloo_net::websocket::Message::Text as Txt;
-    use futures::{SinkExt, StreamExt};
+    use futures::SinkExt;
     let client: Rc<RefCell<Option<SplitSink<WebSocket, gloo_net::websocket::Message>>>> = Default::default();
 
     // (read, write)
