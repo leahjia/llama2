@@ -1,6 +1,6 @@
 use std::{sync::Arc};
 use futures::stream::SplitSink;
-use futures::lock::Mutex;
+use std::sync::Mutex;
 
 use leptos::*;
 use leptos_meta::*;
@@ -38,7 +38,7 @@ pub fn App() -> impl IntoView {
         let client2 = client.clone();
         let msg = new_message.to_string();
         async move {
-            let mut guard = client2.lock().await;
+            let mut guard = client2.lock().expect("Failed to lock mutex");
             if let Some(mut sink) = guard.take() {
                 let result = sink.send(Txt(msg.to_string())).await;
                 *guard = Some(sink); // Put the sink back into the Option
