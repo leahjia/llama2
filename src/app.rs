@@ -1,5 +1,6 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{sync::Arc};
 use futures::stream::SplitSink;
+use futures::lock::Mutex;
 
 use leptos::*;
 use leptos_meta::*;
@@ -18,7 +19,7 @@ pub fn App() -> impl IntoView {
     use gloo_net::websocket::futures::WebSocket;
     use gloo_net::websocket::Message::Text as Txt;
     use futures::SinkExt;
-    let client: Rc<RefCell<Option<SplitSink<WebSocket, gloo_net::websocket::Message>>>> = Default::default();
+    let client: Arc<Mutex<Option<SplitSink<WebSocket, gloo_net::websocket::Message>>>> = Default::default();
 
     // (read, write)
     let (conversation, set_conversation) = create_signal(Conversation::new());
@@ -33,18 +34,20 @@ pub fn App() -> impl IntoView {
 
         // send convo to server (api.rs)
         // conver(conversation.get())
-        
+
         let client2 = client.clone();
         let msg = new_message.to_string();
         async move {
-            client2
-                .borrow_mut()
-                .as_mut()
-                .unwrap()
-                .send(Txt(msg.to_string()))
-                .await
-                .map_err(|_| ServerFnError::ServerError("WebSocket issue".to_string()))
+            let mut guard = client2.lock().await;
+            if let Some(mut sink) = guard.take() {
+                let result = sink.send(Txt(msg.to_string())).await;
+                *guard = Some(sink); // Put the sink back into the Option
+                result.map_err(|_| ServerFnError::ServerError("WebSocket issue".to_string()))
+            } else {
+                Err(ServerFnError::ServerError("WebSocket client not initialized".to_string()))
+            }
         }
+
     });
 
     create_effect(move |_| {

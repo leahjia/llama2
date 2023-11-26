@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use cfg_if::cfg_if;
 
 #[cfg(feature = "ssr")]
